@@ -1,0 +1,21 @@
+Player1: click on chip D3
+Player1: click on cell E4
+Player2: click on chip E6
+Player2: click on cell F6
+Player2: click on cell F5
+Player1: click on chip E4
+Player1: click on cell D5
+Player2: click on chip D7
+Player2: click on cell E6
+Player1: click on chip B3
+Player1: click on cell A4
+Player2: click on chip C6
+Player2: click on cell B5
+Player1: click on chip D5
+Player1: click on cell C6
+Player2: click on chip C8
+Player2: click on chip E8
+Player2: click on cell D7
+Player1: click on chip C6
+Player1: click on cell E8
+ate chip D7
