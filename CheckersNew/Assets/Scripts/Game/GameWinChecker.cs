@@ -1,5 +1,7 @@
 using Chip;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using Utils.Coordinates;
 
@@ -30,21 +32,21 @@ namespace Game
         private void BlackHadWon()
         {
             Debug.Log("Black won");
-            HadWon();
+            Win();
         }
 
-        private void HadWon()
+        private void Win()
         {
 #if UNITY_EDITOR
             EditorApplication.isPaused = true;
 #endif
-            GameCharacteristics.HasAlreadyWon = true;
+            GameCharacteristics.IsAlreadyWon = true;
         }
 
         private void WhiteHadWon()
         {
             Debug.Log("White won");
-            HadWon();
+            Win();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace InstallersForZenject
         {
             _moveManagerObservable = new MoveManagerObservable(_moveManager);
             Container.Bind<MoveManager>().FromInstance(_moveManager).AsSingle();
-            Container.BindInterfacesAndSelfTo<MoveManagerObservable>().FromInstance(_moveManagerObservable);
+            Container.Bind<MoveManagerObservable>().FromInstance(_moveManagerObservable);
         }
     }
     

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using Cell;
+using CellsGetter;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Utils;
@@ -13,11 +16,11 @@ namespace Chip
     public class ChipComponent : BaseClickComponent
     {
         private RaycastHit[] _results = new RaycastHit[2];
-        private CellsAvailableForMovingGetter _cellsAvailableForMovingGetter;
+        private IGetCellsAvailableForMovingStrategy _getCellsStrategy;
         public Action<PairOfCoordinates> OnChipMoved;
         public bool IsMoving;
-
-        public CellsAvailableForMovingGetter CellsAvailableForMovingGetter => _cellsAvailableForMovingGetter;
+        public IGetCellsAvailableForMovingStrategy GetCellsStrategy => _getCellsStrategy;
+        public List<CellComponent> CellsAvailableForMove { get; set; } = new();
 
 
         public override void OnPointerEnter(PointerEventData eventData)
@@ -41,7 +44,7 @@ namespace Chip
         protected override void Awake()
         {
             base.Awake();
-            _cellsAvailableForMovingGetter = new CellsAvailableForMovingGetter(this, _moveManager);
+            _getCellsStrategy = new CellsAvailableForMovingGetter(this, _moveManager);
         }
 
         private void Start()
@@ -50,22 +53,21 @@ namespace Chip
             Pair = cell;
         }
 
-        public IEnumerator MoveToCell(CellComponent cell, float timeForMove, float timeForCameraRotate)
+        public async UniTaskVoid MoveToCell(CellComponent cell, float timeForMove, float timeForCameraRotate)
         {
             IsMoving = true;
             var position = transform.position;
-            Vector3 startPosition = position;
             var cellPosition = cell.transform.position;
-            Vector3 endPosition = new Vector3(cellPosition.x, position.y, cellPosition.z);
+            var endPosition = new Vector3(cellPosition.x, position.y, cellPosition.z);
             var tween = transform.DOMove(endPosition, timeForMove);
-            yield return tween.WaitForCompletion();
+            await tween.AsyncWaitForCompletion();
             IsMoving = false;
             Pair = cell;
             OnChipMoved?.Invoke(cell.CoordinatesOnField);
 
-            yield return new WaitForFixedUpdate();
+            await UniTask.WaitForFixedUpdate();
 
-            var count = Physics.RaycastNonAlloc(new Ray(startPosition, (endPosition - startPosition).normalized),
+            var count = Physics.RaycastNonAlloc(new Ray(position, (endPosition - position).normalized),
                 _results, 2f);
             if (count > 0)
             {
@@ -81,8 +83,7 @@ namespace Chip
                 }
             }
 
-            Array.Clear(_results, 0, _results.Length);
-            yield return UniTaskHelper.CameraRotate(timeForCameraRotate);
+            await UniTaskHelper.CameraRotate(timeForCameraRotate);
         }
 
         public void DestroyChip()
@@ -93,7 +94,7 @@ namespace Chip
                 Pair.Pair = null;
                 Pair.SetPreviousMaterial();
                 Destroy(gameObject);
-                _moveManager.Chips.RemoveAt(_moveManager.Chips.FindIndex(t => t.name == name));
+                _moveManager.Chips.RemoveAt(_moveManager.Chips.FindIndex(t => t == this));
             }
 
             if (_observer.IsReplaying)

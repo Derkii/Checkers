@@ -2,21 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cell;
+using Chip;
 using Game;
 using UnityEngine;
 
-namespace Chip
+namespace CellsGetter
 {
-    public class CellsAvailableForMovingGetter
+    public class CellsAvailableForMovingGetter : IGetCellsAvailableForMovingStrategy
     {
         private ChipComponent _chip;
         private MoveManager _moveManager;
 
-        public readonly Dictionary<NeighborType, CellComponent> CellsAvailableForMove =
+        private readonly Dictionary<NeighborType, CellComponent> _cellsAvailableForMove =
             new();
 
         
-        public void CalculateMoves()
+        public IEnumerable<CellComponent> CalculateMoves()
         {
             CellComponent cell;
 
@@ -29,28 +30,28 @@ namespace Chip
                 throw new NotImplementedException();
             }
 
-            if (GameCharacteristics.HasAlreadyWon)
+            if (GameCharacteristics.IsAlreadyWon)
             {
                 Debug.Log("Game has already finished");
-                return;
+                return null;
             }
             if (GameCharacteristics.IsCameraMoving)
             {
                 Debug.Log("You can't move while camera is moving");
-                return;
+                return null;
             }
 
             if (_chip.IsMoving)
             {
                 Debug.Log("You can't move while another chip is moving");
-                return;
+                return null;
             }
 
             if (_chip.Color == ColorType.White
-                != GameCharacteristics.IsWhiteTurn)
+                != GameCharacteristics.IsWhitesTurn)
             {
-                Debug.Log("Not your turn!");
-                return;
+                Debug.Log("Not your turn");
+                return null;
             }
 
             void PreCalculate()
@@ -59,20 +60,19 @@ namespace Chip
                 _chip.SetMaterial(_moveManager.SelectedChipMaterial);
                 foreach (var _ in _moveManager.Chips)
                 {
-                    CellsAvailableForMove.Clear();
+                    _cellsAvailableForMove.Clear();
                 }
             }
 
-            void IfArentAnyInAvailableCells()
-            {
-                if (CellsAvailableForMove.Any()) return;
-                Debug.Log("Вам некуда ходить этой шашкой, выберите другую");
+            void AnyInAvailableCells()
+            {  
+                Debug.Log("Aren't any fields available to move by this checker");
                 _chip.SetMaterial(_chip.Color == ColorType.White
                     ? _moveManager.DefaultWhiteChipMaterial
                     : _moveManager.DefaultBlackChipMaterial, false);
             }
 
-            if (GameCharacteristics.IsWhiteTurn && _chip.Color == ColorType.White &&
+            if (GameCharacteristics.IsWhitesTurn && _chip.Color == ColorType.White &&
                 GameCharacteristics.IsCameraMoving == false)
             {
                 PreCalculate();
@@ -80,10 +80,12 @@ namespace Chip
                 CheckNeighbourCellsToAvailableForMove(NeighborType.TopLeft, cell);
 
                 CheckNeighbourCellsToAvailableForMove(NeighborType.TopRight, cell);
-
-                IfArentAnyInAvailableCells();
+                if (!_cellsAvailableForMove.Any())
+                {
+                    AnyInAvailableCells();
+                }
             }
-            else if (GameCharacteristics.IsWhiteTurn == false && _chip.Color == ColorType.Black &&
+            else if (GameCharacteristics.IsWhitesTurn == false && _chip.Color == ColorType.Black &&
                      GameCharacteristics.IsCameraMoving == false)
             {
                 PreCalculate();
@@ -92,8 +94,13 @@ namespace Chip
 
                 CheckNeighbourCellsToAvailableForMove(NeighborType.BottomRight, cell);
 
-                IfArentAnyInAvailableCells();
+                if (!_cellsAvailableForMove.Any())
+                {
+                    AnyInAvailableCells();
+                }
             }
+
+            return _cellsAvailableForMove.Values;
         }
 
         private void CheckNeighbourCellsToAvailableForMove(NeighborType type, CellComponent startCell)
@@ -108,17 +115,10 @@ namespace Chip
                 cell = cell.NeighboursController.GetNeighbour(type);
 
                 if (cell is null || cell.Pair is not null) return;
-
-                cell.SetMaterial(_moveManager.AvailableForMoveCellMaterial);
-
-                CellsAvailableForMove.Add(type, cell);
             }
-            else
-            {
-                cell.SetMaterial(_moveManager.AvailableForMoveCellMaterial);
+            cell.SetMaterial(_moveManager.AvailableForMoveCellMaterial);
 
-                CellsAvailableForMove.Add(type, cell);
-            }
+            _cellsAvailableForMove.Add(type, cell);
         }
 
 

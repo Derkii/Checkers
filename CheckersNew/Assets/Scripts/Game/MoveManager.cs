@@ -13,24 +13,17 @@ namespace Game
     {
         [SerializeField] private float _timeForCameraMove;
         [SerializeField] private float _timeForChipsMove;
-        [SerializeField]
-        private CheckersMaterialsController _checkersMaterialsController;
-        [HideInInspector] public List<ChipComponent> Chips = new();
+        [SerializeField] private CheckersMaterialsController _checkersMaterialsController;
+        [Inject] private MoveManagerObservable _moveManagerObservable;
+        private GameWinChecker _winChecker;
+        public List<ChipComponent> Chips { get; private set; }
         public Dictionary<PairOfCoordinates, CellComponent> Cells = new();
         public Material SelectedChipMaterial => _checkersMaterialsController.SelectedChipMaterial;
-
         public Material AvailableForMoveCellMaterial => _checkersMaterialsController.AvailableForMoveCellMaterial;
-
         public Material DefaultWhiteChipMaterial => _checkersMaterialsController.DefaultWhiteChipMaterial;
-
         public Material DefaultBlackChipMaterial => _checkersMaterialsController.DefaultBlackChipMaterial;
-        private GameWinChecker _winChecker;
-
         public delegate void OnChipMoved(ChipComponent chip, PairOfCoordinates newCoordinates);
-
         public event OnChipMoved OnChipMovedEvent;
-        [Inject]
-        private MoveManagerObservable _moveManagerObservable;
 
         private void Awake()
         {
@@ -42,7 +35,7 @@ namespace Game
             Cells = allCells.ToDictionary(t => t.CoordinatesOnField, t => t);
             GeometryUtility.Cells = Cells;
             OnChipMovedEvent += (_, _) =>
-                GameCharacteristics.IsWhiteTurn = !GameCharacteristics.IsWhiteTurn;
+                GameCharacteristics.IsWhitesTurn = !GameCharacteristics.IsWhitesTurn;
             InitCells();
         }
 
@@ -84,24 +77,22 @@ namespace Game
             else
             {
                 var chip = Chips.FirstOrDefault(t =>
-                    t.CellsAvailableForMovingGetter.CellsAvailableForMove.ContainsValue(component as CellComponent));
+                    t.CellsAvailableForMove.Contains(component as CellComponent));
                 if (chip == null)
                 {
                     CellsAndChipsMaterialsClear(new[] { component });
                     foreach (var chipComponent in Chips)
                     {
-                        chipComponent.CellsAvailableForMovingGetter.CellsAvailableForMove.Clear();
+                        chipComponent.CellsAvailableForMove.Clear();
                     }
                 }
                 else
                 {
-                    GameCharacteristics.IsWhiteTurn = GameCharacteristics.IsWhiteTurn;
-                    GameCharacteristics.IsCameraMoving = true;
                     chip.Pair.Pair = null;
                     CellsAndChipsMaterialsClear();
-                    chip.CellsAvailableForMovingGetter.CellsAvailableForMove.Clear();
+                    chip.CellsAvailableForMove.Clear();
 
-                    StartCoroutine(chip.MoveToCell((CellComponent)component, _timeForChipsMove, _timeForCameraMove));
+                    chip.MoveToCell((CellComponent)component, _timeForChipsMove, _timeForCameraMove);
                 }
             }
         }
@@ -110,7 +101,8 @@ namespace Game
         {
             _moveManagerObservable.OnChipClickAction?.Invoke(baseClick.CoordinatesOnField);
 
-            ((ChipComponent)baseClick).CellsAvailableForMovingGetter.CalculateMoves();
+            var chipComponent = (ChipComponent)baseClick;
+            chipComponent.CellsAvailableForMove = chipComponent.GetCellsStrategy.CalculateMoves().ToList();
         }
 
         public void OnChipRemoveActionInvoke(PairOfCoordinates pairOfCoordinatesOnField)

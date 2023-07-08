@@ -1,5 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
+using Game;
 using Utils.Coordinates;
 
 namespace Observer
@@ -7,9 +8,9 @@ namespace Observer
     public class ImitationController
     {
         private ObserverComponent _observer;
-        private IObservable _observable;
+        private MoveManagerObservable _observable;
 
-        public ImitationController(ObserverComponent component, IObservable observable)
+        public ImitationController(ObserverComponent component, MoveManagerObservable observable)
         {
             _observer = component;
             _observable = observable;

@@ -7,16 +7,16 @@ using GeometryUtility = Utils.GeometryUtility;
 
 namespace Game
 {
-    public class MoveManagerObservable : IObservable
+    public class MoveManagerObservable
     {
+        private readonly MoveManager _moveManager;
         public Action<PairOfCoordinates> OnCellClickAction { get; set; }
         public Action<PairOfCoordinates> OnChipClickAction { get; set; }
         public Action<PairOfCoordinates> OnChipRemoveAction { get; set; }
-        public bool IsWhiteMove => GameCharacteristics.IsWhiteTurn;
+        public bool IsWhiteTurn => GameCharacteristics.IsWhitesTurn;
 
         public bool IsCameraMoving => GameCharacteristics.IsCameraMoving;
 
-        private readonly MoveManager _moveManager;
 
         public MoveManagerObservable(MoveManager manager)
         {
