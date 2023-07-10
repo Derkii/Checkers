@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Cell;
 using Chip;
+using Cysharp.Threading.Tasks;
+using ModestTree;
 using UnityEngine;
 using Utils.Coordinates;
 using Zenject;
@@ -41,6 +43,10 @@ namespace Game
 
         private void InitCells()
         {
+            foreach (var coordinates in Cells.Select(t => t.Value.CoordinatesOnField).GetDuplicates())
+            {
+                Debug.Log(coordinates + " " + $"{Cells.Where(T => T.Value.CoordinatesOnField == coordinates).Select(t => t.Value.name)}");
+            }
             foreach (var chip in Chips)
             {
                 chip.OnChipMoved += pair => OnChipMovedEvent?.Invoke(chip, pair);

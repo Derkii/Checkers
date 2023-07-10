@@ -13,10 +13,6 @@ namespace CellsGetter
         private ChipComponent _chip;
         private MoveManager _moveManager;
 
-        private readonly Dictionary<NeighborType, CellComponent> _cellsAvailableForMove =
-            new();
-
-        
         public IEnumerable<CellComponent> CalculateMoves()
         {
             CellComponent cell;
@@ -58,9 +54,9 @@ namespace CellsGetter
             {
                 _moveManager.CellsAndChipsMaterialsClear(new[] { _chip.Pair });
                 _chip.SetMaterial(_moveManager.SelectedChipMaterial);
-                foreach (var _ in _moveManager.Chips)
+                foreach (var chip in _moveManager.Chips)
                 {
-                    _cellsAvailableForMove.Clear();
+                    chip.CellsAvailableForMove.Clear();
                 }
             }
 
@@ -80,7 +76,7 @@ namespace CellsGetter
                 CheckNeighbourCellsToAvailableForMove(NeighborType.TopLeft, cell);
 
                 CheckNeighbourCellsToAvailableForMove(NeighborType.TopRight, cell);
-                if (!_cellsAvailableForMove.Any())
+                if (!_chip.CellsAvailableForMove.Any())
                 {
                     AnyInAvailableCells();
                 }
@@ -94,13 +90,13 @@ namespace CellsGetter
 
                 CheckNeighbourCellsToAvailableForMove(NeighborType.BottomRight, cell);
 
-                if (!_cellsAvailableForMove.Any())
+                if (!_chip.CellsAvailableForMove.Any())
                 {
                     AnyInAvailableCells();
                 }
             }
 
-            return _cellsAvailableForMove.Values;
+            return _chip.CellsAvailableForMove;
         }
 
         private void CheckNeighbourCellsToAvailableForMove(NeighborType type, CellComponent startCell)
@@ -118,7 +114,7 @@ namespace CellsGetter
             }
             cell.SetMaterial(_moveManager.AvailableForMoveCellMaterial);
 
-            _cellsAvailableForMove.Add(type, cell);
+            _chip.CellsAvailableForMove.Add(cell);
         }
 
 
