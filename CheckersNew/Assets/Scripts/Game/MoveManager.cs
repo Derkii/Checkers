@@ -108,7 +108,7 @@ namespace Game
             _moveManagerObservable.OnChipClickAction?.Invoke(baseClick.CoordinatesOnField);
 
             var chipComponent = (ChipComponent)baseClick;
-            chipComponent.CellsAvailableForMove = chipComponent.GetCellsStrategy.CalculateMoves().ToList();
+            chipComponent.CellsAvailableForMove = chipComponent.CellsStrategy.CalculateMoves()?.ToList();
         }
 
         public void OnChipRemoveActionInvoke(PairOfCoordinates pairOfCoordinatesOnField)

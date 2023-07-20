@@ -19,7 +19,7 @@ namespace Utils
             GameCharacteristics.IsCameraMoving = true;
 
             var camera = Camera.main;
-            if (camera is not null)
+            if (camera != null)
             {
                 var parent = camera.transform.parent;
                 var rotation = parent.eulerAngles;

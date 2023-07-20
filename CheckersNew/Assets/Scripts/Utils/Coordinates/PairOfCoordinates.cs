@@ -51,6 +51,5 @@ namespace Utils.Coordinates
             _vertical = vertical;
             _horizontal = horizontal;
         }
-
     }
 }

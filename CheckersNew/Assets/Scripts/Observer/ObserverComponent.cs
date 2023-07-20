@@ -39,6 +39,7 @@ namespace Observer
             {
                 if (IsRecording)
                 {
+                    ResetTextInRecordFile();
                     _observable.OnCellClickAction += OnCellClick;
                     _observable.OnChipClickAction += OnChipClick;
                     _observable.OnChipRemoveAction += OnChipRemove;
@@ -100,13 +101,14 @@ namespace Observer
                 //Structure of command in the Record file is: action what COORDINATES - PlayerNUM.
                 //Example: white chip(Player1) ate chip on 5B, then it would be "ate chip 5B - Player1" in the Record file.
 
-                var what = splittedLine[1];
+                var @object = splittedLine[1];
                 var action = splittedLine[0];
                 var pairOfCoordinates = splittedLine[2].StringToCoordinates();
-                await imitationController.Logic(what, action, pairOfCoordinates);
+                await imitationController.Imitate(@object, action, pairOfCoordinates);
                 while (_observable.IsCameraMoving || _observable.IsChipMoving)
                     await UniTask.Yield();
             }
+            Debug.Log("Replay ended");
         }
 
         

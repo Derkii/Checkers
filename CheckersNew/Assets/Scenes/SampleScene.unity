@@ -959,10 +959,6 @@ PrefabInstance:
       propertyPath: CoordinatsOnField._horizontal
       value: 8
       objectReference: {fileID: 0}
-    - target: {fileID: 4829554540681581500, guid: 13bd155aed9f49e4d837d712190a709b, type: 3}
-      propertyPath: m_Name
-      value: Black Chip
-      objectReference: {fileID: 0}
     - target: {fileID: 4829554540681581496, guid: c45ba5e047b8da940907b8e93c70aefc, type: 3}
       propertyPath: m_RootOrder
       value: 67
@@ -1014,6 +1010,10 @@ PrefabInstance:
     - target: {fileID: 4829554540681581500, guid: c45ba5e047b8da940907b8e93c70aefc, type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829554540681581500, guid: 13bd155aed9f49e4d837d712190a709b, type: 3}
+      propertyPath: m_Name
+      value: Black Chip
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4829554540681581497, guid: c45ba5e047b8da940907b8e93c70aefc, type: 3}
@@ -6058,10 +6058,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5a8ef28a97e5e648942174fae2315e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _chipClickDelay: 0
-  _cellClickDelay: 0
-  _chipRemoveDelay: 0
-  _isReplaying: 0
+  _chipClickDelay: 1
+  _cellClickDelay: 1
+  _chipRemoveDelay: 0.3
+  _isReplaying: 1
   _isRecording: 0
 --- !u!1001 &1321515453
 PrefabInstance:

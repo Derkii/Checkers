@@ -25,7 +25,7 @@ public abstract class BaseClickComponent : MonoBehaviour, IPointerClickHandler, 
         set
         {
             _pair = value;
-            if (value is null) return;
+            if (value == null) return;
             
             value._pair = this;
             

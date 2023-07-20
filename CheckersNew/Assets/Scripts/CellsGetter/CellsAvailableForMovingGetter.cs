@@ -15,11 +15,13 @@ namespace CellsGetter
 
         public IEnumerable<CellComponent> CalculateMoves()
         {
-            CellComponent cell;
+            CellComponent startCell;
 
-            if (_chip is not null && _chip.Pair is not null)
+            #region Checks
+
+            if (_chip != null && _chip.Pair != null)
             {
-                cell = (CellComponent)_chip.Pair;
+                startCell = (CellComponent)_chip.Pair;
             }
             else
             {
@@ -31,6 +33,7 @@ namespace CellsGetter
                 Debug.Log("Game has already finished");
                 return null;
             }
+
             if (GameCharacteristics.IsCameraMoving)
             {
                 Debug.Log("You can't move while camera is moving");
@@ -61,34 +64,45 @@ namespace CellsGetter
             }
 
             void AnyInAvailableCells()
-            {  
+            {
                 Debug.Log("Aren't any fields available to move by this checker");
                 _chip.SetMaterial(_chip.Color == ColorType.White
                     ? _moveManager.DefaultWhiteChipMaterial
                     : _moveManager.DefaultBlackChipMaterial, false);
             }
 
-            if (GameCharacteristics.IsWhitesTurn && _chip.Color == ColorType.White &&
-                GameCharacteristics.IsCameraMoving == false)
+            #endregion
+
+            CellComponent cell;
+
+            void AddNeighbourCellToList(NeighborType type)
+            {
+                cell = GetNeighbourCellAvailableForMove(type, startCell);
+                if (cell == null) return;
+                cell.SetMaterial(_moveManager.AvailableForMoveCellMaterial);
+                _chip.CellsAvailableForMove.Add(cell);
+            }
+
+
+            if (GameCharacteristics.IsWhitesTurn && _chip.Color == ColorType.White)
             {
                 PreCalculate();
 
-                CheckNeighbourCellsToAvailableForMove(NeighborType.TopLeft, cell);
+                AddNeighbourCellToList(NeighborType.TopLeft);
 
-                CheckNeighbourCellsToAvailableForMove(NeighborType.TopRight, cell);
+                AddNeighbourCellToList(NeighborType.TopRight);
                 if (!_chip.CellsAvailableForMove.Any())
                 {
                     AnyInAvailableCells();
                 }
             }
-            else if (GameCharacteristics.IsWhitesTurn == false && _chip.Color == ColorType.Black &&
-                     GameCharacteristics.IsCameraMoving == false)
+            else if (GameCharacteristics.IsWhitesTurn == false && _chip.Color == ColorType.Black)
             {
                 PreCalculate();
 
-                CheckNeighbourCellsToAvailableForMove(NeighborType.BottomLeft, cell);
+                AddNeighbourCellToList(NeighborType.BottomLeft);
 
-                CheckNeighbourCellsToAvailableForMove(NeighborType.BottomRight, cell);
+                AddNeighbourCellToList(NeighborType.BottomRight);
 
                 if (!_chip.CellsAvailableForMove.Any())
                 {
@@ -99,22 +113,22 @@ namespace CellsGetter
             return _chip.CellsAvailableForMove;
         }
 
-        private void CheckNeighbourCellsToAvailableForMove(NeighborType type, CellComponent startCell)
+        private CellComponent GetNeighbourCellAvailableForMove(NeighborType type, CellComponent startCell,
+            int findIterations = 4)
         {
-            var cell = startCell.NeighboursController.GetNeighbour(type);
-            if (cell is null) return;
-
-            if (cell.Pair is not null)
+            CellComponent cell = startCell;
+            for (int i = 0; i < findIterations; i++)
             {
-                if ((int)cell.Pair.Color == (int)_chip.Color) return;
-
                 cell = cell.NeighboursController.GetNeighbour(type);
-
-                if (cell is null || cell.Pair is not null) return;
+                if (cell == null) return null;
+                if (cell.Pair != null)
+                {
+                    if ((int)cell.Pair.Color == (int)_chip.Color || findIterations == 1 || i == findIterations - 1) return null;
+                }
+                else break;
             }
-            cell.SetMaterial(_moveManager.AvailableForMoveCellMaterial);
 
-            _chip.CellsAvailableForMove.Add(cell);
+            return cell;
         }
 
 

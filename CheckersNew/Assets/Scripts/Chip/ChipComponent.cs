@@ -15,11 +15,10 @@ namespace Chip
 {
     public class ChipComponent : BaseClickComponent
     {
-        private RaycastHit[] _results = new RaycastHit[2];
-        private IGetCellsAvailableForMovingStrategy _getCellsStrategy;
+        private IGetCellsAvailableForMovingStrategy _cellsStrategy;
         public Action<PairOfCoordinates> OnChipMoved;
         public bool IsMoving;
-        public IGetCellsAvailableForMovingStrategy GetCellsStrategy => _getCellsStrategy;
+        public IGetCellsAvailableForMovingStrategy CellsStrategy => _cellsStrategy;
         public List<CellComponent> CellsAvailableForMove { get; set; } = new();
 
 
@@ -44,7 +43,7 @@ namespace Chip
         protected override void Awake()
         {
             base.Awake();
-            _getCellsStrategy = new CellsAvailableForMovingGetter(this, _moveManager);
+            _cellsStrategy = new CellsAvailableForMovingGetter(this, _moveManager);
         }
 
         private void Start()
@@ -66,22 +65,17 @@ namespace Chip
             OnChipMoved?.Invoke(cell.CoordinatesOnField);
 
             await UniTask.WaitForFixedUpdate();
-
-            var count = Physics.RaycastNonAlloc(new Ray(position, (endPosition - position).normalized),
-                _results, 2f);
-            if (count > 0)
+            var results = Physics.RaycastAll(new Ray(position, (endPosition - position).normalized),
+                Vector3.Distance(endPosition, position));
+            foreach (var raycastHit in results)
             {
-                for (var index = 0; index < count; index++)
+                if (raycastHit.transform != transform &&
+                    raycastHit.transform.TryGetComponent(out ChipComponent chip))
                 {
-                    var raycastHit = _results[index];
-                    if (raycastHit.transform != transform &&
-                        raycastHit.transform.TryGetComponent(out ChipComponent chip))
-                    {
-                        chip.DestroyChip();
-                        break;
-                    }
+                    chip.DestroyChip();
                 }
             }
+
 
             await UniTaskHelper.CameraRotate(timeForCameraRotate);
         }

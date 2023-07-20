@@ -28,7 +28,7 @@ namespace Game
         public void ImitateCellClick(PairOfCoordinates cellPairOfCoordinates)
         {
             var cell = GeometryUtility.FindCellByCoordinates(cellPairOfCoordinates);
-            if (cell is not null)
+            if (cell != null)
             {
                 _moveManager.OnCellClick(cell);
             }
@@ -37,7 +37,7 @@ namespace Game
         public void ImitateChipRemove(PairOfCoordinates pairOfCoordinates)
         {
             var cell = GeometryUtility.FindCellByCoordinates(pairOfCoordinates);
-            if (cell is not null && cell.Pair is not null)
+            if (cell != null && cell.Pair != null)
             {
                 ((ChipComponent)cell.Pair).DestroyChip();
             }
@@ -46,10 +46,21 @@ namespace Game
         public void ImitateChipClick(PairOfCoordinates chipPairOfCoordinates)
         {
             var cell = GeometryUtility.FindCellByCoordinates(chipPairOfCoordinates);
-            if (cell is not null && cell.Pair is not null)
+            if (cell != null && cell.Pair != null)
             {
                 _moveManager.OnChipClick(cell.Pair);
             }
+            else {
+                if (cell == null)
+                {
+                    throw new Exception($"Cell doesn't exist {chipPairOfCoordinates}");
+                }
+
+                if (cell.Pair == null)
+                {
+                    throw new Exception($"Chip doesn't exist by coordinates {chipPairOfCoordinates}");
+                }
+        }
         }
     }
 }

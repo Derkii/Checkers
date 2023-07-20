@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Game;
+using UnityEngine;
 using Utils.Coordinates;
 
 namespace Observer
@@ -16,7 +17,7 @@ namespace Observer
             _observable = observable;
         }
 
-        public async UniTask Logic(string what, string action, PairOfCoordinates coordinates)
+        public async UniTask Imitate(string what, string action, PairOfCoordinates coordinates)
         {
             switch (what)
             {
